@@ -156,6 +156,43 @@ All key gameplay values are exposed to Blueprint, allowing designers to tweak va
 Extensibility
 The system is structured to support additional future integrations and extensions.
 
+Cooldown Handling
+Cooldown is applied using a GameplayEffect but enforced in C++ using a GameplayTag on the AbilitySystemComponent.
+When the ability is activated, a cooldown tag is added. While this tag exists, the ability is blocked in CanActivateAbility. The tag is removed after the cooldown duration.
+
+Reason:
+
+* Ensures deterministic behavior regardless of editor configuration
+* Avoids dependency on tags in UE 5.5
+* Keeps cooldown logic explicit and easy to debug
+
+Data-Driven Cooldown
+Cooldown duration is read directly from the GameplayEffect at runtime instead of hardcoding values.
+
+Reason:
+
+* Designers can tweak cooldown without code changes
+* Keeps gameplay tuning flexible
+* Maintains single source of truth
+
+Ability Structure
+A base ability class (RPGGameplayAbility) is used, with Leap Slam implemented in a derived class. So that its easy to add more additional abilities in future.
+
+Reason:
+
+* Shared logic can be reused across abilities
+* New abilities can be added without modifying existing code
+* Keeps the system modular
+
+Damage Handling Design
+Damage is processed inside the AttributeSet, while UI is handled in the Enemy Blueprint.
+
+Reason:
+
+* Keeps gameplay data separate from presentation
+* Avoids mixing UI logic with core systems
+* Easier to extend UI later
+
 ---
 
 How to Run
@@ -166,6 +203,36 @@ How to Run
 4. Press Q to activate Leap Slam
 
 You should observe arc-based movement, AoE damage on landing, floating damage numbers, and correct mana and cooldown behavior.
+
+Expected Behavior
+
+* Character performs an arc-based leap forward
+* Enemy takes damage on landing (AoE)
+* Damage numbers appear above enemy
+* Ability cannot be spammed during cooldown
+* Ability becomes usable again after cooldown duration
+
+---
+
+Extensibility
+
+The system is designed to scale into a full ARPG:
+
+* New abilities can be added by inheriting from RPGGameplayAbility
+* New attributes can be added in RPGAttributeSet
+* Additional enemies can reuse the same GAS setup
+* Cooldown system can be reused using GameplayTags
+* UI layer can be expanded into a full combat HUD
+
+---
+
+Future Improvements
+
+* Animation montage integration for abilities
+* Targeting system
+* Cooldown UI indicators
+* Multiplayer validation and replication improvements
+* Damage types and resistance system
 
 ---
 
